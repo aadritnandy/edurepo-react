@@ -143,7 +143,7 @@ const AppContent = () => {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/edurepo-react">
       <AuthProvider>
         <AppContent />
       </AuthProvider>
