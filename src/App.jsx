@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { Book, Bell, Plus, User, Search, Menu, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { Book, Bell, Plus, User, Search, Menu, LogOut, Settings, ChevronDown, Pencil } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Dashboard from './components/Dashboard';
 import ClassView from './components/ClassView';
