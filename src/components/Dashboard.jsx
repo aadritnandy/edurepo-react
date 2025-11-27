@@ -160,14 +160,11 @@ const Dashboard = () => {
                                         />
                                         <span>{course.language}</span>
                                     </div>
-                                    <div className="flex items-center gap-1 text-muted-foreground">
-                                        <User className="h-4 w-4" />
-                                        <span>{course.memberCount} Members</span>
-                                    </div>
+
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
-                                    <span>{Math.floor(Math.random() * 7)} days ago</span>
+                                    <span>{new Date(course.created_at).toLocaleDateString()}</span>
                                 </div>
                             </div>
                         </div>

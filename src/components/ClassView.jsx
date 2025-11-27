@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Send, Image as ImageIcon, Trash2, User } from 'lucide-react';
+import { ArrowLeft, Send, Image as ImageIcon, Trash2, User, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import FileExplorer from './FileExplorer';
@@ -24,6 +24,22 @@ const ClassView = () => {
 
         if (!error) setClassData(data);
         setLoading(false);
+    };
+
+    const handleLeaveClass = async () => {
+        if (!confirm('Are you sure you want to leave this class?')) return;
+
+        const { error } = await supabase
+            .from('user_classes')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('class_id', id);
+
+        if (error) {
+            alert('Error leaving class');
+        } else {
+            window.location.href = '/edurepo-react/'; // Redirect to dashboard
+        }
     };
 
     const isOwner = user?.id === classData?.owner_id;
@@ -51,15 +67,26 @@ const ClassView = () => {
                         <h1 className="text-3xl font-bold tracking-tight mb-2">{classData.name}</h1>
                         <p className="text-muted-foreground">{classData.description}</p>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                        <User className="h-4 w-4" />
-                        <span>{classData.owner_id === user.id ? 'You are the Owner' : 'Member View'}</span>
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                            <User className="h-4 w-4" />
+                            <span>{classData.owner_id === user.id ? 'You are the Owner' : 'Member View'}</span>
+                        </div>
+                        {!isOwner && (
+                            <button
+                                onClick={handleLeaveClass}
+                                className="flex items-center gap-2 text-sm text-destructive hover:bg-destructive/10 px-3 py-1 rounded-md transition-colors"
+                            >
+                                <LogOut className="h-4 w-4" />
+                                Leave Class
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
 
             <FileExplorer classId={id} isOwner={isOwner} />
-        </div>
+        </div >
     );
 };
 

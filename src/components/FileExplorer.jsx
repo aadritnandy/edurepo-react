@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Folder, FileText, File, ChevronRight, Upload, FolderPlus, ArrowLeft, Trash2, Download } from 'lucide-react';
+import { Folder, FileText, File, ChevronRight, Upload, FolderPlus, ArrowLeft, Trash2, Download, FolderInput } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const FileExplorer = ({ classId, isOwner }) => {
@@ -65,6 +65,7 @@ const FileExplorer = ({ classId, isOwner }) => {
             }]);
 
         if (error) alert('Error creating folder');
+        else loadFiles();
     };
 
     const handleFileUpload = async (e) => {
@@ -105,6 +106,7 @@ const FileExplorer = ({ classId, isOwner }) => {
             alert('Upload failed: ' + error.message);
         } finally {
             setUploading(false);
+            loadFiles();
         }
     };
 
@@ -117,6 +119,41 @@ const FileExplorer = ({ classId, isOwner }) => {
             .eq('id', fileId);
 
         if (error) alert('Error deleting item');
+        else loadFiles();
+    };
+
+    const handleMove = async (fileId, currentName) => {
+        // Simple implementation: Ask for destination folder name
+        // In a real app, you'd want a folder picker modal
+        const destName = prompt(`Move "${currentName}" to folder (enter folder name, or leave empty for root):`);
+        if (destName === null) return; // Cancelled
+
+        let newParentId = null;
+
+        if (destName.trim()) {
+            // Find the folder with this name in the current class
+            const { data: folders, error: searchError } = await supabase
+                .from('files')
+                .select('id')
+                .eq('class_id', classId)
+                .eq('name', destName)
+                .eq('type', 'folder')
+                .single();
+
+            if (searchError || !folders) {
+                alert('Destination folder not found!');
+                return;
+            }
+            newParentId = folders.id;
+        }
+
+        const { error } = await supabase
+            .from('files')
+            .update({ parent_id: newParentId })
+            .eq('id', fileId);
+
+        if (error) alert('Error moving item');
+        else loadFiles();
     };
 
     const formatSize = (bytes) => {
@@ -218,11 +255,47 @@ const FileExplorer = ({ classId, isOwner }) => {
                                     {new Date(file.created_at).toLocaleDateString()}
                                 </span>
                                 {isOwner && (
+                                    <>
+                                        <button
+                                            onClick={() => handleMove(file.id, file.name)}
+                                            className="p-1 hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                            title="Move"
+                                        >
+                                            <FolderInput className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(file.id, file.type)}
+                                            className="p-1 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                            title="Delete"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    </>
+                                )}
+                                {file.type !== 'folder' && (
                                     <button
-                                        onClick={() => handleDelete(file.id, file.type)}
-                                        className="p-1 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            try {
+                                                const response = await fetch(file.url);
+                                                const blob = await response.blob();
+                                                const url = window.URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                a.download = file.name;
+                                                document.body.appendChild(a);
+                                                a.click();
+                                                window.URL.revokeObjectURL(url);
+                                                document.body.removeChild(a);
+                                            } catch (error) {
+                                                console.error('Download failed:', error);
+                                                window.open(file.url, '_blank');
+                                            }
+                                        }}
+                                        className="p-1 hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                        title="Download"
                                     >
-                                        <Trash2 className="h-4 w-4" />
+                                        <Download className="h-4 w-4" />
                                     </button>
                                 )}
                             </div>

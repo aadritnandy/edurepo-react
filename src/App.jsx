@@ -34,13 +34,10 @@ const AppContent = () => {
                 <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
                   <Book className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="hidden font-bold sm:inline-block">StudentHub</span>
+                <span className="hidden font-bold sm:inline-block">edurepo</span>
               </Link>
               <nav className="flex items-center space-x-6 text-sm font-medium">
                 <Link to="/" className="transition-colors hover:text-foreground/80 text-foreground">Dashboard</Link>
-                <Link to="/pulls" className="transition-colors hover:text-foreground/80 text-foreground/60">Pull Requests</Link>
-                <Link to="/issues" className="transition-colors hover:text-foreground/80 text-foreground/60">Issues</Link>
-                <Link to="/explore" className="transition-colors hover:text-foreground/80 text-foreground/60">Explore</Link>
               </nav>
             </div>
 
